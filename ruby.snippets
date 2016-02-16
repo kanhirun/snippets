@@ -1,0 +1,78 @@
+# ======================================================================
+# Skeletons
+# ======================================================================
+
+snippet _skel "Model skeleton"
+class Thing
+  # do something...
+end
+endsnippet
+
+# ======================================================================
+# Test Strategy Patterns
+
+snippet active_record_spec_helper "" b
+require 'active_record'
+
+connection_info = YAML.load_file("config/database.yml")["test"]
+ActiveRecord::Base.establish_connection(connection_info)
+
+RSpec.configure do |config|
+  config.around do |example|
+    ActiveRecord::Base.transaction do
+      example.run
+      raise ActiveRecord::Rollback
+    end
+  end
+end
+endsnippet
+
+# ======================================================================
+# Custom Assertion
+
+# Create a purpose-built Assertion Method that compares
+# only those attributes of the object that define test-specific equality.
+
+snippet domain_assertion "Elevate the test into 'business speak'"
+RSpec::Matchers.define ${1:assertion_method} do |expected|
+	match do |actual|
+		${2:<predicate expression>}
+	end
+
+	failure_message_for_should do |actual|
+		${3:assertion_message}
+	end
+end
+endsnippet
+
+snippet diagnostic_assertion "Make the Assertion Message more precise about what is failing"
+	expect(${1:subject}).to #{2:assertion_method}, "#{3:assertion_message}"
+endsnippet
+
+# ======================================================================
+# Behavior Verification
+
+snippet expected_behavior_verification "Verify the indirect outputs of the SUT as they are received"
+	expect(${1:SUT}).to receive(${2:message})
+
+	${3:exercise}
+endsnippet
+
+snippet procedural_behavior_verification "Verify the indirect outputs of the SUT through a Test Spy"
+	expect(${2:test_spy}).to receive(${3:message})
+endsnippet
+
+# ======================================================================
+# State Verification
+
+snippet procedural_state_verification "Write a series of calls"
+aggregate_failures do
+	expect(${1:SUT}).to ${2:assertion_method} ${3:result}
+end
+endsnippet
+
+snippet test_class "Creates a group." b
+describe ${1:SomeClass} do
+	$0
+end
+endsnippet
