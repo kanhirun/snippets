@@ -1,38 +1,82 @@
-# ======================================================================
-# Skeletons
-# ======================================================================
+snippet debugger "Preferred ruby debugger" b
+require 'pry'; binding.pry
+endsnippet
 
-snippet _skel "Model skeleton"
-class Thing
-  # do something...
+# - https://robots.thoughtbot.com/always-define-respond-to-missing-when-overriding
+snippet method_missing "Always defines respond_to_missing? when overriding method_missing" b
+def method_missing(method_name, *args, &block)
+	$0
+end
+
+def respond_to_missing?(method_name, include_private = false)
+	$1
 end
 endsnippet
 
 # ======================================================================
-# Test Strategy Patterns
+# 1. Skeletons
 
-snippet active_record_spec_helper "" b
+snippet _spec_helper "Basic config." b
+PROJECT_ROOT = File.expand_path('../..', __FILE__)
+$:.unshift PROJECT_ROOT
+
+RSpec.configure do |config|
+	config.expect_with :rspec do |expectations|
+		expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+	end
+
+	config.mock_with :rspec do |mocks|
+		mocks.verify_partial_doubles = true
+	end
+end
+endsnippet
+
+
+# Use VCR to record and playback HTTP interactions:
+# - https://github.com/vcr/vcr
+snippet _vcr_config "VCR configuration" b
+VCR.configure do |config|
+	config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
+	config.hook_into :webmock
+
+	# Use `:vcr` metadata to record an HTTP request, or
+	# Pass a hash to set the cassette options:
+	#		vcr_options = { cassette_name: "example", record: :new_episodes }
+	#		describe "Using an options hash", :vcr => vcr_options do
+	config.configure_rspec_metadata!
+end
+endsnippet
+
+
+# - MODEL_ROOT: Use this constrait to enforce layer testing only (isolationist TDD)
+snippet _activerecord_spec_helper "Speeding Up ActiveRecord Tests -- Corey Haines" b
+MODEL_ROOT = File.expand_path('../../app/models', __FILE__)
+$:.unshift MODEL_ROOT
+
 require 'active_record'
 
 connection_info = YAML.load_file("config/database.yml")["test"]
+
 ActiveRecord::Base.establish_connection(connection_info)
 
 RSpec.configure do |config|
-  config.around do |example|
-    ActiveRecord::Base.transaction do
-      example.run
-      raise ActiveRecord::Rollback
-    end
-  end
+	config.around do |example|
+		ActiveRecord::Base.transaction do
+			example.run
+			raise ActiveRecord::Rollback
+		end
+	end
 end
 endsnippet
 
+
 # ======================================================================
 # Custom Assertion
-
 # Create a purpose-built Assertion Method that compares
 # only those attributes of the object that define test-specific equality.
 
+# - Anti-pattern heuristic (03/11/2016): Do not use this pattern in *unit* tests;
+#		This is because the test should be written in the same level of abstraction everywhere.
 snippet domain_assertion "Elevate the test into 'business speak'"
 RSpec::Matchers.define ${1:assertion_method} do |expected|
 	match do |actual|
@@ -53,13 +97,13 @@ endsnippet
 # Behavior Verification
 
 snippet expected_behavior_verification "Verify the indirect outputs of the SUT as they are received"
-	expect(${1:SUT}).to receive(${2:message})
+	expect(${1:object}).to receive(${2:message})
 
-	${3:exercise}
+	${3:${VISUAL:# EXERCISE}}
 endsnippet
 
 snippet procedural_behavior_verification "Verify the indirect outputs of the SUT through a Test Spy"
-	expect(${2:test_spy}).to receive(${3:message})
+	expect(${2:spy}).to receive(${3:message})
 endsnippet
 
 # ======================================================================
@@ -67,12 +111,41 @@ endsnippet
 
 snippet procedural_state_verification "Write a series of calls"
 aggregate_failures do
-	expect(${1:SUT}).to ${2:assertion_method} ${3:result}
+	expect(${1:subject}).to ${2:assertion_method} ${3:result}
 end
 endsnippet
 
-snippet test_class "Creates a group." b
-describe ${1:SomeClass} do
-	$0
+# ======================================================================
+# Delta Assertion
+
+snippet delta_assertion "" b
+expect do
+	${0:${VISUAL:# exercise}}
+end.to change{${1:subject}}
+endsnippet
+
+# ======================================================================
+# Test Double
+
+snippet test_double "" b
+double = instance_double(${1:collaborator})
+endsnippet
+
+# ======================================================================
+# Four Phase Test
+
+snippet implicit_setup_teardown_four_phase_test "" b
+it '$0' do
+	$3
+
+	$2
+
+	$1
+end
+endsnippet
+
+snippet test_class "" b
+describe $0 do
+	${1:${VISUAL:# test cases...}}
 end
 endsnippet

@@ -1,0 +1,57 @@
+# Add new concept:
+#		* Add support for abstract factories (or 'Actors') which are scoped to acceptance/
+# Add ctags support:
+#		* Add support for jumping to schema (i.e. `class User` -> `create_table :users`)
+#		* Add support for jumping to spec (i.e. `def foo` -> `describe '#foo'`)
+#
+# - Doesn't use bundler for isolated tests (Fast Tests With and Without Rails, Bernhardt)
+snippet _ruby_heuristics "Default Ruby-esque Projections" b
+{
+	"db/schema.rb":     { "type": "schema" },
+	"config/routes.rb": { "type": "routes" },
+
+	"spec/acceptance/*.feature": {
+		"type": "acceptance",
+		"test_command": "!bundle exec cucumber <spec> --color"
+	},
+
+	"spec/acceptance/*/": {
+		"type": "actor",
+		"after_create_hook": ":edit {dirname}/{}_steps.rb {dirname}/{}_factory.rb"
+	},
+
+	"spec/support/factories/*_factory.rb": {
+		"type": "factory"
+	},
+
+	"lib/*.rb": {
+		"alternate": "spec/lib/{}_spec.rb",
+		"test_command": "!rspec <spec> --color"
+	},
+	"spec/lib/*_spec.rb": {
+		"type": "service",
+		"alternate": "lib/{}.rb",
+		"test_command": "!rspec <spec> --color"
+	},
+
+	"app/controllers/*.rb": {
+		"alternate": "spec/app/controllers/{}_spec.rb",
+		"test_command": "!bundle exec rspec <spec> --color"
+	},
+	"spec/app/controllers/*_spec.rb": {
+		"type": "controller",
+		"alternate": "app/controllers/{}.rb",
+		"test_command": "!bundle exec rspec <spec> --color"
+	},
+
+	"app/models/*.rb": {
+		"alternate": "spec/app/models/{}_spec.rb",
+		"test_command": "!bundle exec rspec <spec> --color"
+	},
+	"spec/app/models/*_spec.rb": {
+		"type": "model",
+		"alternate": "app/models/{}.rb",
+		"test_command": "!bundle exec rspec <spec> --color"
+	}
+}
+endsnippet
