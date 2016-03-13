@@ -48,12 +48,13 @@ end
 endsnippet
 
 
-# - MODEL_ROOT: Use this constrait to enforce layer testing only (isolationist TDD)
 snippet _activerecord_spec_helper "Speeding Up ActiveRecord Tests -- Corey Haines" b
-MODEL_ROOT = File.expand_path('../../app/models', __FILE__)
-$:.unshift MODEL_ROOT
+PROJECT_ROOT = File.expand_path('../..', __FILE__)
+$:.unshift PROJECT_ROOT
 
+require 'yaml'
 require 'active_record'
+require 'shoulda-matchers'
 
 connection_info = YAML.load_file("config/database.yml")["test"]
 
@@ -142,6 +143,7 @@ it '$0' do
 
 	$1
 end
+$4
 endsnippet
 
 snippet test_class "" b
