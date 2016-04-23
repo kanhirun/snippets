@@ -1,3 +1,7 @@
+# Explanation:
+#   -e: abort the script when an operation fails
+#   -u: fail when variables are unset.
+#   -o pipefail: returns a nonzero exit code when any command within the pipeline fails
 snippet _skel "Shebang" b
 #!/usr/bin/env bash
 set -euo pipefail
