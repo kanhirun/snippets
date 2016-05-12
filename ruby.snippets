@@ -29,6 +29,11 @@ snippet _spec_helper "Default rspec configurations" b
 PROJECT_ROOT = File.expand_path('../..', __FILE__)
 $:.unshift PROJECT_ROOT
 
+require_relative 'support/require_dependency'
+require_relative 'support/services/code_coverage'
+
+CodeCoverage.start!
+
 RSpec.configure do |config|
 	config.expect_with :rspec do |expectations|
 		expectations.include_chain_clauses_in_custom_matcher_descriptions = true
